@@ -1,59 +1,71 @@
+
 # Import necessary libraries
 import numpy as np
-import joblib  # For loading the serialized model
-import pandas as pd  # For data manipulation
-from flask import Flask, request, jsonify  # For creating the Flask
-# Initialize the Flask application
+import joblib
+import pandas as pd
+from flask import Flask, request, jsonify
+
+# Initialize Flask application
 Superkart_sales_predictor_api = Flask("Superkart sales predictor")
 
-#load the trained machinelearning model
-model =joblib.load("Product_Store_Sales_Total.joblib")
+# Load the trained machine learning model
+model = joblib.load("Product_Store_Sales_Total.joblib")
 
-#define a route for the home page (GET request)
+
+# --------------------------------------------------
+# Home page
+# --------------------------------------------------
+
 @Superkart_sales_predictor_api.route("/")
 def home():
     return "<h1>SuperKart Sales Predictor</h1>"
 
-# Define an endpoint for single property prediction (POST request)
+
+# --------------------------------------------------
+# Single Prediction
+# --------------------------------------------------
+
 @Superkart_sales_predictor_api.route("/predict", methods=["POST"])
 def predict():
-    # Get the JSON data from the request
+
+    # Get JSON data from request
     data = request.get_json()
 
-# Extract relevant features from the JSON
-sample = {
-    'Product_Weight': data['Product_Weight'],
-    'Product_Sugar_Content': data['Product_Sugar_Content'],
-    'Product_Allocated_Area': data['Product_Allocated_Area'],
-    'Product_MRP': data['Product_MRP'],
-    'Store_Size': data['Store_Size'],
-    'Store_Location_City_Type': data['Store_Location_City_Type'],
-    'Store_Type': data['Store_Type'],
-    'Store_Age': data['Store_Age']
-}
+    # Extract relevant features
+    sample = {
+        "Product_Weight": data["Product_Weight"],
+        "Product_Sugar_Content": data["Product_Sugar_Content"],
+        "Product_Allocated_Area": data["Product_Allocated_Area"],
+        "Product_MRP": data["Product_MRP"],
+        "Store_Size": data["Store_Size"],
+        "Store_Location_City_Type": data["Store_Location_City_Type"],
+        "Store_Type": data["Store_Type"],
+        "Store_Age": data["Store_Age"]
+    }
 
+    # Convert extracted data into DataFrame
+    input_data = pd.DataFrame([sample])
 
-#convert the extracted data into a Pandas DataFrame
-input_data = pd.DataFrame([sample])
+    # Make prediction
+    prediction = model.predict(input_data)
 
-
-# Make prediction
-prediction = model.predict(input_data)
-
-# Return prediction
-return jsonify({
+    # Return prediction
+    return jsonify({
         "prediction": float(prediction[0])
     })
 
 
-# Define an endpoint for batch prediction
+# --------------------------------------------------
+# Batch Prediction
+# --------------------------------------------------
+
 @Superkart_sales_predictor_api.route("/predict_batch", methods=["POST"])
 def predict_batch():
 
-    # Get JSON data from the request
+    # Get JSON data from request
     data = request.get_json()
 
-    # Convert JSON data into a DataFrame
+    # Convert JSON data into DataFrame
     batch_data = pd.DataFrame(data)
 
     # Fix inconsistent category
@@ -65,7 +77,7 @@ def predict_batch():
     # Create Store_Age from Store_Age_Years
     batch_data["Store_Age"] = batch_data["Store_Age_Years"]
 
-    # Select only the features used by the trained model
+    # Select only features used by the trained model
     features = [
         "Product_Weight",
         "Product_Sugar_Content",
@@ -87,6 +99,14 @@ def predict_batch():
         "predictions": predictions.tolist()
     })
 
-    # Run the Flask application in debug mode if this script is executed directly
-    if __name__ == "__main__":
-        Superkart_sales_predictor_api.run(debug=True)
+
+# --------------------------------------------------
+# Run Flask application
+# --------------------------------------------------
+
+if __name__ == "__main__":
+    Superkart_sales_predictor_api.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
+    )
