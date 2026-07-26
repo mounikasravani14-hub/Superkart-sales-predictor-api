@@ -38,10 +38,10 @@ input_data = pd.DataFrame([sample])
 
 
 # Make prediction
-    prediction = model.predict(input_data)
+prediction = model.predict(input_data)
 
-    # Return prediction as JSON
-    return jsonify({
+# Return prediction
+return jsonify({
         "prediction": float(prediction[0])
     })
 
