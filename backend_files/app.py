@@ -2,7 +2,7 @@
 import numpy as np
 import joblib  # For loading the serialized model
 import pandas as pd  # For data manipulation
-from flask import Flask, request, jsonify  # For creating the Flask 
+from flask import Flask, request, jsonify  # For creating the Flask
 # Initialize the Flask application
 Superkart_sales_predictor_api = Flask("Superkart sales predictor")
 
@@ -20,7 +20,7 @@ def predict():
     # Get the JSON data from the request
     data = request.get_json()
 
-# Extract relevant features from the JSON 
+# Extract relevant features from the JSON
 sample = {
     'Product_Weight': data['Product_Weight'],
     'Product_Sugar_Content': data['Product_Sugar_Content'],
